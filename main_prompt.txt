@@ -1,0 +1,5 @@
+Here is a numbered list of the titles of some of the top posts trending on Reddit this morning.
+I have selected them from a curated list of subreddits. I would like you to choose one of the titles and tell me which one is the most innocuous, least politically controversial, but otherwise most interesting.
+Please respond with the number corresponding to the title that you choose, without any additional formatting or punctuation.
+Titles:
+{}
