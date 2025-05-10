@@ -30,4 +30,6 @@ def scrape_page(relative_link):
     submission.comment_sort = "top"
     submission.comments.replace_more(limit=None)
     all_comments = submission.comments.list()
-    return submission.subreddit.display_name, [comment.body.strip() for comment in all_comments if isinstance(comment, praw.models.Comment)]
+    comments = [comment.body.strip() for comment in all_comments if isinstance(comment, praw.models.Comment)]
+    if len(comments) > 25: comments = comments[:25] # don't want to hit the Gemini token limit
+    return submission.subreddit.display_name, comments

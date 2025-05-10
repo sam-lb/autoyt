@@ -3,6 +3,7 @@ import json
 from dotenv import load_dotenv
 from google import genai
 from scraper import get_titles, scrape_page
+from tiktok_voice import tts, Voice
 
 
 CACHE_DIR = "./cached_data"
@@ -40,21 +41,14 @@ def make_request(chat, prompt):
 
 
 if __name__ == "__main__":
-    QUERY_MODEL = False
-    RETRIEVE_TITLES = False
-    WRITE_TO_CACHE = False
+    GENERATE = False
+    WRITE_TO_CACHE = True
     TARGET_CACHE = 1
 
-    if RETRIEVE_TITLES:
+    if GENERATE:
         print("Retrieving titles from site")
         titles, links = get_titles()
-    else:
-        print("Loading titles from cache {}".format(TARGET_CACHE))
-        cached_data = read_from_cache(TARGET_CACHE)
-        titles = cached_data["titles"]
-        links = cached_data["links"]
 
-    if QUERY_MODEL:
         load_dotenv(dotenv_path="key.env")
         key = os.getenv("API_KEY")
         client = genai.Client(api_key=key)
@@ -101,3 +95,12 @@ if __name__ == "__main__":
                 "sub_name": subreddit_name,
                 "comments": comments
             })
+    else:
+        print("Loading titles from cache {}".format(TARGET_CACHE))
+        cached_data = read_from_cache(TARGET_CACHE)
+        titles = cached_data["titles"]
+        links = cached_data["links"]
+        script = cached_data["responses"][1]
+
+    print(script)
+    tts(script, Voice.GHOSTFACE, "output.mp3", play_sound=False)
