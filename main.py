@@ -2,7 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 from google import genai
-from scraper import get_titles
+from scraper import get_titles, scrape_page
 
 
 CACHE_DIR = "./cached_data"
@@ -35,24 +35,19 @@ def read_from_cache(cache_id):
 
     return data
 
-def make_request(prompt):
-    return client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
-    ).text.strip()
+def make_request(chat, prompt):
+    return chat.send_message(prompt).text.strip()
 
 
 if __name__ == "__main__":
     QUERY_MODEL = False
     RETRIEVE_TITLES = False
     WRITE_TO_CACHE = False
-    TARGET_CACHE = 0
+    TARGET_CACHE = 1
 
     if RETRIEVE_TITLES:
         print("Retrieving titles from site")
-        titles_and_links = get_titles()
-        titles = [item[0] for item in titles_and_links]
-        links = [item[1] for item in titles_and_links]
+        titles, links = get_titles()
     else:
         print("Loading titles from cache {}".format(TARGET_CACHE))
         cached_data = read_from_cache(TARGET_CACHE)
@@ -63,24 +58,46 @@ if __name__ == "__main__":
         load_dotenv(dotenv_path="key.env")
         key = os.getenv("API_KEY")
         client = genai.Client(api_key=key)
+        chat = client.chats.create(model="gemini-2.0-flash")
+
         print("Gemini API loaded")
 
         with open("main_prompt.txt", "r") as f:
             prompt_template = f.read().rstrip()
 
+        with open("prompts.json", "r") as f:
+            prompts = json.load(f)
+
+        initial_prompt = prompts["0"]
         initial_prompt = prompt_template.format(
             "\n".join(["Title {}: {}".format(i, title) for i, title in enumerate(titles, start=1)])
         )
-        response = make_request(initial_prompt)
+        response = make_request(chat, initial_prompt)
 
-        try:
-            chosen_title = titles[int(response) - 1]
-        except (ValueError, IndexError):
-            print("The model failed to choose a valid title")
-        else:
-            if WRITE_TO_CACHE:
-                write_to_cache({
-                    "responses": [chosen_title],
-                    "titles": titles,
-                    "links": links
-                })
+        # assume that the model has chosen a valid response
+        # if not, this will raise an exception and stop execution, which is fine.
+        chosen_index = int(response) - 1
+        chosen_title = titles[int(response) - 1]
+        chosen_link = links[int(response) - 1]
+
+        print(chosen_title)
+        print(chosen_link)
+
+        subreddit_name, comments = scrape_page(chosen_link)
+
+        second_prompt = prompts["1"]
+        second_prompt = second_prompt.format(
+            chosen_title,
+            subreddit_name,
+            "\n".join(["Comment {}: {}".format(i, comment) for i, comment in enumerate(comments, start=1)])
+        )
+        script = make_request(chat, second_prompt)
+
+        if WRITE_TO_CACHE:
+            write_to_cache({
+                "responses": [chosen_title, script],
+                "titles": titles,
+                "links": links,
+                "sub_name": subreddit_name,
+                "comments": comments
+            })
