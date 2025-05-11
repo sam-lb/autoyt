@@ -103,4 +103,4 @@ if __name__ == "__main__":
         script = cached_data["responses"][1]
 
     print(script)
-    tts(script, Voice.GHOSTFACE, "output.mp3", play_sound=False)
+    tts(script, Voice.GHOSTFACE, "output_{}.mp3".format(TARGET_CACHE), play_sound=False)
