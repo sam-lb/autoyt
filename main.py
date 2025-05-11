@@ -41,9 +41,9 @@ def make_request(chat, prompt):
 
 
 if __name__ == "__main__":
-    GENERATE = False
+    GENERATE = True
     WRITE_TO_CACHE = True
-    TARGET_CACHE = 1
+    TARGET_CACHE = 2
 
     if GENERATE:
         print("Retrieving titles from site")
@@ -56,14 +56,11 @@ if __name__ == "__main__":
 
         print("Gemini API loaded")
 
-        with open("main_prompt.txt", "r") as f:
-            prompt_template = f.read().rstrip()
-
         with open("prompts.json", "r") as f:
             prompts = json.load(f)
 
         initial_prompt = prompts["0"]
-        initial_prompt = prompt_template.format(
+        initial_prompt = initial_prompt.format(
             "\n".join(["Title {}: {}".format(i, title) for i, title in enumerate(titles, start=1)])
         )
         response = make_request(chat, initial_prompt)
