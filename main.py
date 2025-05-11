@@ -3,6 +3,7 @@ import json
 from dotenv import load_dotenv
 from google import genai
 from scraper import get_titles, scrape_page
+from cleaner import clean_script
 from tiktok_voice import tts, Voice
 
 
@@ -41,11 +42,13 @@ def make_request(chat, prompt):
 
 
 if __name__ == "__main__":
-    GENERATE = True
+    GENERATE_SCRIPT = False
+    CLEAN_SCRIPT = True
+    GENERATE_AUDIO = True
     WRITE_TO_CACHE = True
     TARGET_CACHE = 2
 
-    if GENERATE:
+    if GENERATE_SCRIPT:
         print("Retrieving titles from site")
         titles, links = get_titles()
 
@@ -99,5 +102,8 @@ if __name__ == "__main__":
         links = cached_data["links"]
         script = cached_data["responses"][1]
 
+    if CLEAN_SCRIPT: script = clean_script(script)
     print(script)
-    tts(script, Voice.GHOSTFACE, "output_{}.mp3".format(TARGET_CACHE), play_sound=False)
+
+    if GENERATE_AUDIO:
+        tts(script, Voice.GHOSTFACE, "./output_audio/output_{}.mp3".format(TARGET_CACHE), play_sound=False)
