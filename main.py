@@ -42,11 +42,12 @@ def make_request(chat, prompt):
 
 
 if __name__ == "__main__":
-    GENERATE_SCRIPT = False
+    GENERATE_SCRIPT = True
     CLEAN_SCRIPT = True
     GENERATE_AUDIO = True
+    GENERATE_CAPTIONS = False
     WRITE_TO_CACHE = True
-    TARGET_CACHE = 2
+    TARGET_CACHE = 3
 
     if GENERATE_SCRIPT:
         print("Retrieving titles from site")
@@ -105,5 +106,18 @@ if __name__ == "__main__":
     if CLEAN_SCRIPT: script = clean_script(script)
     print(script)
 
+    audio_file = "./output_audio/output_{}.mp3".format(TARGET_CACHE)
+    print(audio_file)
+
     if GENERATE_AUDIO:
-        tts(script, Voice.GHOSTFACE, "./output_audio/output_{}.mp3".format(TARGET_CACHE), play_sound=False)
+        tts(script, Voice.GHOSTFACE, audio_file, play_sound=False)
+
+    if GENERATE_CAPTIONS:
+        # audio = pyfoal.load.audio(audio_file)
+        # aligner = "radtts"
+        # checkpoint = pyfoal.DEFAULT_CHECKPOINT
+        # alignment = pyfoal.from_text_and_audio(
+        #     script, audio, pyfoal.SAMPLE_RATE,
+        #     aligner=aligner, checkpoint=checkpoint
+        # )
+        pass

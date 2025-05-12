@@ -6,7 +6,7 @@
 import string
 import re
 
-ALLOWED_CHARS = string.ascii_letters + string.digits + "\n-(),. "
+ALLOWED_CHARS = string.ascii_letters + string.digits + "\n-(),. ?!"
 BOLD_PATTERN = re.compile(r"\*\*.+\*\*")
 NEWLINE_PATTERN = re.compile(r"\n+")
 
