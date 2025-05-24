@@ -5,6 +5,7 @@ from google import genai
 from scraper import get_titles, scrape_page
 from cleaner import clean_script
 from tiktok_voice import tts, Voice
+from pyperclip import copy
 
 
 CACHE_DIR = "./cached_data"
@@ -42,11 +43,11 @@ def make_request(chat, prompt):
 
 
 if __name__ == "__main__":
-    GENERATE_SCRIPT = True
+    GENERATE_SCRIPT = False
     CLEAN_SCRIPT = True
-    GENERATE_AUDIO = True
+    GENERATE_AUDIO = False
     GENERATE_CAPTIONS = False
-    WRITE_TO_CACHE = True
+    WRITE_TO_CACHE = False
     TARGET_CACHE = 3
 
     if GENERATE_SCRIPT:
@@ -105,6 +106,7 @@ if __name__ == "__main__":
 
     if CLEAN_SCRIPT: script = clean_script(script)
     print(script)
+    copy(script)
 
     audio_file = "./output_audio/output_{}.mp3".format(TARGET_CACHE)
     print(audio_file)
@@ -113,11 +115,5 @@ if __name__ == "__main__":
         tts(script, Voice.GHOSTFACE, audio_file, play_sound=False)
 
     if GENERATE_CAPTIONS:
-        # audio = pyfoal.load.audio(audio_file)
-        # aligner = "radtts"
-        # checkpoint = pyfoal.DEFAULT_CHECKPOINT
-        # alignment = pyfoal.from_text_and_audio(
-        #     script, audio, pyfoal.SAMPLE_RATE,
-        #     aligner=aligner, checkpoint=checkpoint
-        # )
+        
         pass

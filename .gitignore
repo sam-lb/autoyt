@@ -6,3 +6,4 @@ tiktok_voice/
 *.mp3
 output_audio/
 footage/
+prompts.json
