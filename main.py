@@ -45,10 +45,10 @@ def make_request(chat, prompt):
 if __name__ == "__main__":
     GENERATE_SCRIPT = False
     CLEAN_SCRIPT = True
-    GENERATE_AUDIO = False
+    GENERATE_AUDIO = True
     GENERATE_CAPTIONS = False
     WRITE_TO_CACHE = False
-    TARGET_CACHE = 3
+    TARGET_CACHE = 4
 
     if GENERATE_SCRIPT:
         print("Retrieving titles from site")
