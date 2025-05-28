@@ -1,5 +1,6 @@
 import os
 import json
+import whisper
 from dotenv import load_dotenv
 from google import genai
 from scraper import get_titles, scrape_page
@@ -43,12 +44,12 @@ def make_request(chat, prompt):
 
 
 if __name__ == "__main__":
-    GENERATE_SCRIPT = False
+    GENERATE_SCRIPT = True
     CLEAN_SCRIPT = True
     GENERATE_AUDIO = True
-    GENERATE_CAPTIONS = False
-    WRITE_TO_CACHE = False
-    TARGET_CACHE = 4
+    GENERATE_CAPTIONS = True
+    WRITE_TO_CACHE = True
+    TARGET_CACHE = 5
 
     if GENERATE_SCRIPT:
         print("Retrieving titles from site")
@@ -89,20 +90,16 @@ if __name__ == "__main__":
         )
         script = make_request(chat, second_prompt)
 
-        if WRITE_TO_CACHE:
-            write_to_cache({
-                "responses": [chosen_title, script],
-                "titles": titles,
-                "links": links,
-                "sub_name": subreddit_name,
-                "comments": comments
-            })
     else:
         print("Loading titles from cache {}".format(TARGET_CACHE))
         cached_data = read_from_cache(TARGET_CACHE)
         titles = cached_data["titles"]
         links = cached_data["links"]
-        script = cached_data["responses"][1]
+        responses = cached_data["responses"]
+        comments = cached_data["comments"]
+        sub_name = cached_data["sub_name"]
+        segments = cached_data["segments"]
+        script = responses[1]
 
     if CLEAN_SCRIPT: script = clean_script(script)
     print(script)
@@ -115,5 +112,21 @@ if __name__ == "__main__":
         tts(script, Voice.GHOSTFACE, audio_file, play_sound=False)
 
     if GENERATE_CAPTIONS:
-        
-        pass
+        print("Loading whisper model...")
+        model = whisper.load_model("turbo")
+        print("model loaded.")
+        print("Transcribing audio (this may take a while) ...")
+        transcription = model.transcribe(audio_file)
+        print("Audio transcribed")
+        segments = transcription["segments"]
+    
+    if WRITE_TO_CACHE:
+        print("Writing to cache")
+        write_to_cache({
+            "responses": [chosen_title, script],
+            "titles": titles,
+            "links": links,
+            "sub_name": subreddit_name,
+            "comments": comments,
+            "segments": segments
+        })
